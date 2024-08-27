@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileWizard - Modern File Conversion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 data-aos="fade-down">FileWizard</h1>
+            <p data-aos="fade-up">Convert and compress your files with ease</p>
+        </header>
+        <main>
+            <div id="dropzone" data-aos="zoom-in">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag and drop files here or click to select</p>
+                <input type="file" id="fileInput">
+            </div>
+            <div id="options" data-aos="fade-up">
+                <div class="select-wrapper">
+                    <select id="outputFormat">
+                        <option value="pdf">PDF</option>
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="heic">HEIC</option>
+                        <option value="mp4">MP4</option>
+                    </select>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="compress">
+                    <span class="slider"></span>
+                    <span class="label">Compress</span>
+                </label>
+                <div class="input-group">
+                    <input type="number" id="width" placeholder="Width">
+                    <input type="number" id="height" placeholder="Height">
+                </div>
+            </div>
+            <button id="convertButton" data-aos="fade-up">
+                <span>Convert</span>
+                <i class="fas fa-magic"></i>
+            </button>
+            <div id="loading">
+                <div class="spinner"></div>
+                <p>Converting...</p>
+            </div>
+            <div id="result"></div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

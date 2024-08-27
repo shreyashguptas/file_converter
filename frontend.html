@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Conversion Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #dropzone {
+            border: 2px dashed #ccc;
+            border-radius: 20px;
+            width: 480px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        #dropzone.highlight {
+            border-color: purple;
+        }
+        #fileInput {
+            display: none;
+        }
+        #options {
+            margin-bottom: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Conversion Web App</h1>
+    <div id="dropzone">
+        <p>Drag and drop files here or click to select</p>
+        <input type="file" id="fileInput">
+    </div>
+    <div id="options">
+        <label for="outputFormat">Convert to:</label>
+        <select id="outputFormat">
+            <option value="pdf">PDF</option>
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="heic">HEIC</option>
+            <option value="mp4">MP4</option>
+        </select>
+        <label for="compress">Compress:</label>
+        <input type="checkbox" id="compress">
+        <label for="width">Width:</label>
+        <input type="number" id="width">
+        <label for="height">Height:</label>
+        <input type="number" id="height">
+    </div>
+    <button id="convertButton">Convert</button>
+    <div id="loading" style="display: none;">Converting...</div>
+    <div id="result"></div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const convertButton = document.getElementById('convertButton');
+        const result = document.getElementById('result');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('highlight');
+        });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('highlight'));
+        dropzone.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        convertButton.addEventListener('click', convertFile);
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('highlight');
+            handleFiles(e.dataTransfer.files);
+        }
+
+        function handleFileSelect(e) {
+            handleFiles(e.target.files);
+        }
+
+        function handleFiles(files) {
+            fileInput.files = files;
+            dropzone.textContent = `Selected file: ${files[0].name}`;
+        }
+
+        async function convertFile() {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('outputFormat', document.getElementById('outputFormat').value);
+            formData.append('compress', document.getElementById('compress').checked);
+            formData.append('width', document.getElementById('width').value);
+            formData.append('height', document.getElementById('height').value);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                result.innerHTML = `<a href="${data.downloadUrl}" download>Download converted file</a>`;
+            } catch (error) {
+                console.error('Error:', error);
+                result.textContent = 'An error occurred during conversion.';
+            }
+        }
+    </script>
+</body>
+</html>
