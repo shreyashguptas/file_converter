@@ -17,6 +17,7 @@ export default async function handler(req, res) {
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
+      console.error('Form parsing error:', err);
       return res.status(500).json({ message: 'Error parsing form data' });
     }
 
@@ -26,33 +27,42 @@ export default async function handler(req, res) {
     }
 
     try {
-      const image = await sharp(imageFile.filepath).toBuffer();
+      // Read the image file
+      const imageBuffer = await sharp(imageFile.filepath).toBuffer();
+
+      // Create a new PDF document
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage();
 
-      const { width, height } = await sharp(image).metadata();
-      const aspectRatio = width / height;
-
-      const maxWidth = 500;
-      const maxHeight = 700;
-      let pdfWidth, pdfHeight;
-
-      if (aspectRatio > maxWidth / maxHeight) {
-        pdfWidth = maxWidth;
-        pdfHeight = maxWidth / aspectRatio;
+      // Embed the image in the PDF
+      let image;
+      if (imageFile.mimetype === 'image/jpeg' || imageFile.mimetype === 'image/jpg') {
+        image = await pdfDoc.embedJpg(imageBuffer);
+      } else if (imageFile.mimetype === 'image/png') {
+        image = await pdfDoc.embedPng(imageBuffer);
       } else {
-        pdfHeight = maxHeight;
-        pdfWidth = maxHeight * aspectRatio;
+        throw new Error('Unsupported image format');
       }
 
-      const pngImage = await pdfDoc.embedPng(image);
-      page.drawImage(pngImage, {
-        x: (page.getWidth() - pdfWidth) / 2,
-        y: (page.getHeight() - pdfHeight) / 2,
-        width: pdfWidth,
-        height: pdfHeight,
+      // Add a page to the PDF
+      const page = pdfDoc.addPage();
+
+      // Get the dimensions of the image
+      const { width, height } = image;
+
+      // Scale the image to fit the page
+      const scaleFactor = Math.min(page.getWidth() / width, page.getHeight() / height);
+      const scaledWidth = width * scaleFactor;
+      const scaledHeight = height * scaleFactor;
+
+      // Draw the image on the page
+      page.drawImage(image, {
+        x: (page.getWidth() - scaledWidth) / 2,
+        y: (page.getHeight() - scaledHeight) / 2,
+        width: scaledWidth,
+        height: scaledHeight,
       });
 
+      // Save the PDF
       const pdfBytes = await pdfDoc.save();
       
       // Store the PDF in Vercel Blob

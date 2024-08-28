@@ -35,14 +35,15 @@ export default function Home() {
         body: formData,
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
         setPdfUrl(data.url);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'An error occurred during conversion. Please try again.');
+        setError(data.message || 'An error occurred during conversion. Please try again.');
       }
     } catch (error) {
+      console.error('Conversion error:', error);
       setError('Network error. Please check your connection and try again.');
     } finally {
       setIsConverting(false);
