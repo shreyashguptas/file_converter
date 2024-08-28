@@ -1,17 +1,19 @@
 {
-  "name": "file-conversion-web-app",
+  "name": "image-to-pdf-converter",
   "version": "1.0.0",
-  "description": "A web application for file conversion",
-  "main": "server.js",
+  "private": true,
   "scripts": {
-    "start": "node server.js",
-    "start:prod": "NODE_ENV=production node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "express": "^4.17.1",
-    "multer": "^1.4.2"
-  },
-  "engines": {
-    "node": "14.x"
+    "formidable": "^2.1.1",
+    "next": "^12.3.4",
+    "pdf-lib": "^1.17.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.30.7"
   }
 }
