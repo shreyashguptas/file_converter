@@ -1,6 +1,7 @@
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
 import formidable from 'formidable';
+import { put, del } from "@vercel/blob";
 
 export const config = {
   api: {
@@ -53,9 +54,22 @@ export default async function handler(req, res) {
       });
 
       const pdfBytes = await pdfDoc.save();
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=converted.pdf');
-      res.send(Buffer.from(pdfBytes));
+      
+      // Store the PDF in Vercel Blob
+      const fileName = `converted_${Date.now()}.pdf`;
+      const { url } = await put(fileName, Buffer.from(pdfBytes), { access: 'public' });
+
+      // Schedule deletion after 10 minutes
+      setTimeout(async () => {
+        try {
+          await del(fileName);
+          console.log(`Deleted ${fileName} after 10 minutes`);
+        } catch (error) {
+          console.error(`Failed to delete ${fileName}:`, error);
+        }
+      }, 600000); // 10 minutes
+
+      res.status(200).json({ url });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error converting image to PDF' });
